@@ -119,5 +119,3 @@ ios/.symlinks/
 # Google Service Info plist
 ios/Runner/GoogleService-Info.plist
 android/app/google-services.json
-
-!.github/
