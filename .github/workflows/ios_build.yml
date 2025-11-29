@@ -1,4 +1,4 @@
-avec ce ios_build name: Build iOS IPA
+name: Build iOS IPA
 
 on:
   push:
