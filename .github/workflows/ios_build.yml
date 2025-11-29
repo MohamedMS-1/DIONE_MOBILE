@@ -28,10 +28,16 @@ jobs:
       run: |
         flutter pub get
 
+    - name: Install CocoaPods dependencies
+      run: |
+        cd ios
+        pod install
+        cd ..
+
     - name: Configure iOS project for development
       run: |
         cd ios
-        xcodebuild -project Runner.xcworkspace -scheme Runner -configuration Debug -allowProvisioningUpdates -destination 'generic/platform=iOS' -quiet
+        xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -allowProvisioningUpdates -destination 'generic/platform=iOS' -quiet
         cd ..
 
     - name: Build iOS app bundle (no code signing)
@@ -58,4 +64,4 @@ jobs:
       with:
         name: iOS-App-Bundle
         path: build/ios/iphoneos/Runner.app
-        retention-days: 90 
+        retention-days: 90
