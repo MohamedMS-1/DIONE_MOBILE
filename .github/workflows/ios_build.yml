@@ -3,7 +3,7 @@ name: Build iOS IPA
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:  # Permet de lancer manuellement
+  workflow_dispatch:
 
 jobs:
   build-ios:
@@ -16,31 +16,26 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.0'
+        flutter-version: '3.22.0'
+        channel: 'stable'
 
-    - name: Install CocoaPods
+    - name: Setup Flutter environment
       run: |
-        sudo gem install cocoapods
+        flutter config --no-analytics
+        flutter --version
+        flutter doctor
 
-    - name: Setup iOS environment
+    - name: Install dependencies
       run: |
-        flutter precache --ios
         flutter pub get
 
     - name: Build iOS IPA
       run: |
         flutter build ipa --release --no-codesign
 
-    - name: Upload IPA artifact
+    - name: Upload IPA
       uses: actions/upload-artifact@v4
       with:
         name: iOS-IPA
         path: build/ios/ipa/*.ipa
         retention-days: 90
-
-    - name: Upload Build logs
-      uses: actions/upload-artifact@v4
-      with:
-        name: Build-Logs
-        path: build/ios/archive/
-        retention-days: 30
