@@ -1,4 +1,4 @@
-name: Build iOS IPA
+avec ce ios_build name: Build iOS IPA
 
 on:
   push:
@@ -23,19 +23,39 @@ jobs:
       run: |
         flutter config --no-analytics
         flutter --version
-        flutter doctor
 
     - name: Install dependencies
       run: |
         flutter pub get
 
-    - name: Build iOS IPA
+    - name: Configure iOS project for development
       run: |
-        flutter build ipa --release --no-codesign
+        cd ios
+        xcodebuild -project Runner.xcworkspace -scheme Runner -configuration Debug -allowProvisioningUpdates -destination 'generic/platform=iOS' -quiet
+        cd ..
 
-    - name: Upload IPA
+    - name: Build iOS app bundle (no code signing)
+      run: |
+        flutter build ios --debug --no-codesign
+
+    - name: Create IPA manually
+      run: |
+        mkdir -p build/ipa_payload/Payload
+        cp -r build/ios/iphoneos/Runner.app build/ipa_payload/Payload/
+        cd build/ipa_payload
+        zip -r ../app.ipa Payload
+        cd ../..
+
+    - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
-        name: iOS-IPA
-        path: build/ios/ipa/*.ipa
+        name: iOS-App-Debug
+        path: build/app.ipa
         retention-days: 90
+
+    - name: Upload App bundle
+      uses: actions/upload-artifact@v4
+      with:
+        name: iOS-App-Bundle
+        path: build/ios/iphoneos/Runner.app
+        retention-days: 90 
