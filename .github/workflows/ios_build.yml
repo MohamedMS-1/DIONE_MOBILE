@@ -28,27 +28,40 @@ jobs:
       run: |
         flutter pub get
 
-    - name: Fix iOS deployment target
+    - name: Install CocoaPods dependencies
       run: |
         cd ios
-        pod repo update
         pod install
         cd ..
 
-    - name: Build iOS without code signing
+    - name: Configure iOS project for development
+      run: |
+        cd ios
+        xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -allowProvisioningUpdates -destination 'generic/platform=iOS' -quiet
+        cd ..
+
+    - name: Build iOS app bundle (no code signing)
       run: |
         flutter build ios --debug --no-codesign
 
     - name: Create IPA manually
       run: |
-        mkdir -p Payload
-        cp -r build/ios/iphoneos/Runner.app Payload/
-        zip -r build/app-debug.ipa Payload
-        rm -rf Payload
+        mkdir -p build/ipa_payload/Payload
+        cp -r build/ios/iphoneos/Runner.app build/ipa_payload/Payload/
+        cd build/ipa_payload
+        zip -r ../app.ipa Payload
+        cd ../..
 
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
-        name: iOS-Debug-IPA
-        path: build/app-debug.ipa
+        name: iOS-App-Debug
+        path: build/app.ipa
+        retention-days: 90
+
+    - name: Upload App bundle
+      uses: actions/upload-artifact@v4
+      with:
+        name: iOS-App-Bundle
+        path: build/ios/iphoneos/Runner.app
         retention-days: 90
